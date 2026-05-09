@@ -45,8 +45,8 @@ def get_features(df):
 
     # RSI 
     diffs = np.diff(p[:, -15:], axis=1)
-    up    = np.clip(diffs, 0, None).sum(axis=1)
-    down  = np.clip(-diffs, 0, None).sum(axis=1)
+    up = np.clip(diffs, 0, None).sum(axis=1)
+    down = np.clip(-diffs, 0, None).sum(axis=1)
     f["rsi"] = up / (up + down + 1e-9)
  
     return f.fillna(0)
@@ -63,7 +63,7 @@ print(f"Features: {X_train.shape[1]}")
 oof_preds = np.zeros(len(train))
 test_preds = np.zeros(len(test))
 
-kf = KFold(n_splits=5, shuffle=True, random_state=42)
+kf = KFold(n_splits=10, shuffle=True, random_state=42)
 
 for fold, (trn_idx, val_idx) in enumerate(kf.split(X_train), 1):
     X_trn, X_val = X_train.iloc[trn_idx], X_train.iloc[val_idx]
@@ -72,7 +72,7 @@ for fold, (trn_idx, val_idx) in enumerate(kf.split(X_train), 1):
     model = lgb.LGBMRegressor(
         n_estimators=1000,
         learning_rate=0.05,
-        num_leaves=31,
+        num_leaves=15,
         verbose=-1,
         random_state=42
     )
