@@ -48,7 +48,20 @@ def get_features(df):
     up = np.clip(diffs, 0, None).sum(axis=1)
     down = np.clip(-diffs, 0, None).sum(axis=1)
     f["rsi"] = up / (up + down + 1e-9)
- 
+
+    # MACD
+    def ema_last(series, span):
+        alpha = 2 / (span + 1)
+        val = series[0]
+        for v in series[1:]:
+            val = alpha * v + (1 - alpha) * val
+        return val
+    
+    ema12 = np.array([ema_last(row[-12:], 12) for row in p])
+    ema26 = np.array([ema_last(row[-26:], 26) for row in p])
+    f["macd"] = ema12 - ema26
+
+    
     return f.fillna(0)
 
 X_train = get_features(train)
@@ -72,7 +85,7 @@ for fold, (trn_idx, val_idx) in enumerate(kf.split(X_train), 1):
     model = lgb.LGBMRegressor(
         n_estimators=1000,
         learning_rate=0.05,
-        num_leaves=15,
+        num_leaves=31,
         verbose=-1,
         random_state=42
     )
